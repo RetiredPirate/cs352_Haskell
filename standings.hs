@@ -28,7 +28,7 @@ import Data.Char
 --
 ----------------------------------------------------------------
 exec:: IO()
-exec = 
+exec =
   do input <- readFile "input.txt"
      putStr (createStandings input)
 
@@ -51,7 +51,7 @@ exec =
 --   dummied up.
 ----------------------------------------------------------------
 exec2:: IO()
-exec2 = 
+exec2 =
   do input <- readFile "input.txt"
      writeFile "output.txt" (createStandings input)
 
@@ -91,33 +91,41 @@ exec2 =
 createStandings:: String -> String
 createStandings = show . concat . groupBy (\x y -> head x == head y) . sortBy compare . map words . lines
 
---concat . groupBy (\x y -> head x == head y) . sortBy compare . 
+--concat . groupBy (\x y -> head x == head y) . sortBy compare .
 
 
 
 
 
 mapGoals:: [String] -> [(String,[Int])]
-mapGoals = [(list!!0, [   ])]
+mapGoals(list) = [(list!!0, scoreList1), (list!!2, scoreList2)]
+  where
+    team1score = read list!!1 :: Int
+    team2score = read list!!3 :: Int
 
+    scoreList1 =
+      if team1score > team2score
+        then [1, 0, 0, team1score, team2score]
+        else if team2score > team1score
+          then [0, 1, 0, team1score, team2score]
+          else [0, 0, 1, team1score, team2score]
 
-countWins:: [String] -> [Int]
-countWins(list) = winList
-    where
-        result = signum ((-) (read (list!!1) :: Int) (read (list!!3) :: Int))
-        winList =
-        if result < 1
-            then [1,0,0]
-            else if result > 1
-                then [0,1,0]
-                else [0,0,1]
-
-
-
-
-
-
-
+    scoreList2 =
+      if team1score > team2score
+        then [0, 1, 0, team2score, team1score]
+        else if team2score > team1score
+          then [1, 0, 0, team2score, team1score]
+          else [0, 0, 1, team2score, team1score]
 
 
 
+-- countWins:: [String] -> [Int]
+-- countWins(list) = winList
+    -- where
+    --     result = signum ((-) (read (list!!1) :: Int) (read (list!!3) :: Int))
+    --     winList =
+        -- if result < 1
+        --     then [1,0,0]
+        --     else if result > 1
+        --         then [0,1,0]
+        --         else [0,0,1]
