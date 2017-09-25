@@ -89,16 +89,19 @@ exec2 =
 --
 ----------------------------------------------------------------
 createStandings:: String -> String
-createStandings = show . sortBy compare . concat . map mapGoals . concat .
-      groupBy (\x y -> head x == head y) . sortBy compare . map words . lines
+createStandings = show . groupBy (\x y -> fst x == fst y) .
+        sortBy compare . concat . map getScores . getListOfLines . concat .
+        groupBy (\x y -> head x == head y) . sortBy compare . map words . lines
 
 
 
+-- getListOfLines:: String -> [[String]]
+-- getListOfLines =
 
 
 
-mapGoals:: [String] -> [(String,[Int])]
-mapGoals([team1, score1, team2, score2]) = [(team1, scoreList1), (team2, scoreList2)]
+getScores:: [String] -> [(String,[Int])]
+getScores([team1, score1, team2, score2]) = [(team1, scoreList1), (team2, scoreList2)]
   where
     team1score = read score1 :: Int
     team2score = read score2 :: Int
