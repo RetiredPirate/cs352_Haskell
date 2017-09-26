@@ -95,7 +95,9 @@ createStandings = show . map combineScores . groupBy (\x y -> fst x == fst y) .
 
 
 ----------------------------------------------------------------
--- function
+-- function getScores
+-- Takes a list of strings and returns a list of two tuples
+-- for each team with their five score numbers
 ----------------------------------------------------------------
 getScores:: [String] -> [(String,[Int])]
 getScores([team1, score1, team2, score2]) = [(team1, scoreList1), (team2, scoreList2)]
@@ -103,6 +105,7 @@ getScores([team1, score1, team2, score2]) = [(team1, scoreList1), (team2, scoreL
     team1score = read score1 :: Int
     team2score = read score2 :: Int
 
+    -- set first 3 numbers based on who won, set scores as gf and ga
     scoreList1 =
       if team1score > team2score
         then [1, 0, 0, team1score, team2score]
@@ -144,7 +147,19 @@ combineScores(list) = (teamName, scoreList)
 -- takes a list of tuples with the team name and five scores
 -- and returns a single String, formatted for printing
 ----------------------------------------------------------------
-formatScores:: [(String, [Int])] -> String
-formatScores([(teamName, [win, loss, tie, goalF, goalA])]) = retString
+formatOutput:: [(String, [Int])] -> String
+formatOutput(list) = retString
   where
-    nameLength = maximum (length teamName) 8
+    nameLength = maximum ( map (length . fst) list)
+    
+
+
+----------------------------------------------------------------
+-- function formatScores
+-- takes a list of tuples with the team name and five scores
+-- and returns a single String, formatted for printing
+----------------------------------------------------------------
+formatScores:: (String, [Int]) -> Int -> String
+formatScores (teamName, [win, loss, tie, goalF, goalA]) nameLength = retString
+  where
+    retString = "NOPE"
