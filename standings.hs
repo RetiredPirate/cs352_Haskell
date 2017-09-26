@@ -89,17 +89,14 @@ exec2 =
 --
 ----------------------------------------------------------------
 createStandings:: String -> String
-createStandings = show . groupBy (\x y -> fst x == fst y) .
-        sortBy compare . concat . map getScores . getListOfLines . concat .
+createStandings = show . map combineScores . groupBy (\x y -> fst x == fst y) .
+        sortBy compare . concat . map getScores . concat .
         groupBy (\x y -> head x == head y) . sortBy compare . map words . lines
 
 
-
--- getListOfLines:: String -> [[String]]
--- getListOfLines =
-
-
-
+----------------------------------------------------------------
+-- function
+----------------------------------------------------------------
 getScores:: [String] -> [(String,[Int])]
 getScores([team1, score1, team2, score2]) = [(team1, scoreList1), (team2, scoreList2)]
   where
@@ -121,14 +118,33 @@ getScores([team1, score1, team2, score2]) = [(team1, scoreList1), (team2, scoreL
           else [0, 0, 1, team2score, team1score]
 
 
+----------------------------------------------------------------
+-- function combineScores
+-- takes in a list of tuples, each with the name of a team and
+-- a list of the five score numbers for that team for a
+-- certain game. This function will be mapped to a sorted
+-- list of these lists, so each given list will be headed
+-- by the same team name. This function adds each of the lists
+-- of scores together into a single list for the given team.
+--
+-- returns a single tuple with the team name and the list of
+-- five score numbers
+----------------------------------------------------------------
+combineScores:: [(String, [Int])] -> (String, [Int])
+combineScores(list) = (teamName, scoreList)
+  where
+    teamName = fst (head list)
 
--- countWins:: [String] -> [Int]
--- countWins(list) = winList
-    -- where
-    --     result = signum ((-) (read (list!!1) :: Int) (read (list!!3) :: Int))
-    --     winList =
-        -- if result < 1
-        --     then [1,0,0]
-        --     else if result > 1
-        --         then [0,1,0]
-        --         else [0,0,1]
+    listOfLists = map snd list
+    scoreList = foldr1 (zipWith (+)) listOfLists
+
+
+----------------------------------------------------------------
+-- function formatScores
+-- takes a list of tuples with the team name and five scores
+-- and returns a single String, formatted for printing
+----------------------------------------------------------------
+formatScores:: [(String, [Int])] -> String
+formatScores([(teamName, [win, loss, tie, goalF, goalA])]) = retString
+  where
+    nameLength = maximum (length teamName) 8
