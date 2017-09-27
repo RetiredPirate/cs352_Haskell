@@ -149,7 +149,7 @@ formatOutput:: [(String, [Int])] -> String
 formatOutput list = "fuck"
   where
     nameLength = maximum ( map (length . fst) list)
-    listOfLines = map (formatScores nameLength) list
+    listOfLines = concatMap (formatScores nameLength) list
 
 
 
