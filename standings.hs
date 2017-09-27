@@ -171,8 +171,5 @@ formatScores nameLength (teamName, [win, loss, tie, goalF, goalA]) = retString
 -- function padLeft
 -- pads the given string to make it the given length
 ----------------------------------------------------------------
-padLeft:: String -> Int -> String
-padLeft text padLength =
-  if (length text) > padLength
-    then take padLength text
-    else text ++ (replicate ((length text) - padLength) ' ')
+padLeft:: Int -> String -> String
+padLeft padLength text = reverse (take padLength (reverse text ++ cycle " "))
