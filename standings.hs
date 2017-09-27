@@ -89,9 +89,11 @@ exec2 =
 --
 ----------------------------------------------------------------
 createStandings:: String -> String
-createStandings = show . map combineScores . groupBy (\x y -> fst x == fst y) .
-        sortBy compare . concat . map getScores . concat .
-        groupBy (\x y -> head x == head y) . sortBy compare . map words . lines
+createStandings = show . map combineScores .
+  groupBy (\x y -> fst x == fst y) .
+    sort . concatMap getScores .
+      concat . groupBy (\x y -> head x == head y) .
+        sort . map words . lines
 
 
 ----------------------------------------------------------------
@@ -100,25 +102,21 @@ createStandings = show . map combineScores . groupBy (\x y -> fst x == fst y) .
 -- for each team with their five score numbers
 ----------------------------------------------------------------
 getScores:: [String] -> [(String,[Int])]
-getScores([team1, score1, team2, score2]) = [(team1, scoreList1), (team2, scoreList2)]
+getScores [team1, score1, team2, score2] = [(team1, scoreList1), (team2, scoreList2)]
   where
     team1score = read score1 :: Int
     team2score = read score2 :: Int
 
     -- set first 3 numbers based on who won, set scores as gf and ga
-    scoreList1 =
-      if team1score > team2score
-        then [1, 0, 0, team1score, team2score]
-        else if team2score > team1score
-          then [0, 1, 0, team1score, team2score]
-          else [0, 0, 1, team1score, team2score]
+    scoreList1
+      | team1score > team2score = [1, 0, 0, team1score, team2score]
+      | team2score > team1score = [0, 1, 0, team1score, team2score]
+      | otherwise = [0, 0, 1, team1score, team2score]
 
-    scoreList2 =
-      if team1score > team2score
-        then [0, 1, 0, team2score, team1score]
-        else if team2score > team1score
-          then [1, 0, 0, team2score, team1score]
-          else [0, 0, 1, team2score, team1score]
+    scoreList2
+      | team1score > team2score = [0, 1, 0, team2score, team1score]
+      | team2score > team1score = [1, 0, 0, team2score, team1score]
+      | otherwise = [0, 0, 1, team2score, team1score]
 
 
 ----------------------------------------------------------------
@@ -134,7 +132,7 @@ getScores([team1, score1, team2, score2]) = [(team1, scoreList1), (team2, scoreL
 -- five score numbers
 ----------------------------------------------------------------
 combineScores:: [(String, [Int])] -> (String, [Int])
-combineScores(list) = (teamName, scoreList)
+combineScores list = (teamName, scoreList)
   where
     teamName = fst (head list)
 
@@ -148,7 +146,7 @@ combineScores(list) = (teamName, scoreList)
 -- and returns a single String, formatted for printing
 ----------------------------------------------------------------
 formatOutput:: [(String, [Int])] -> String
-formatOutput(list) = "fuck"
+formatOutput list = "fuck"
   where
     nameLength = maximum ( map (length . fst) list)
     listOfLines = map (formatScores nameLength) list
