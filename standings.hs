@@ -4,7 +4,7 @@ import Data.Char
 ----------------------------------------------------------------
 -- CS 352 - Project 1 (starter file)
 --
--- PUT YOUR NAME HERE
+-- Andrew Williams
 --
 ----------------------------------------------------------------
 
@@ -148,10 +148,11 @@ combineScores(list) = (teamName, scoreList)
 -- and returns a single String, formatted for printing
 ----------------------------------------------------------------
 formatOutput:: [(String, [Int])] -> String
-formatOutput(list) = retString
+formatOutput(list) = "fuck"
   where
     nameLength = maximum ( map (length . fst) list)
-    
+    listOfLines = map (formatScores nameLength) list
+
 
 
 ----------------------------------------------------------------
@@ -159,7 +160,19 @@ formatOutput(list) = retString
 -- takes a list of tuples with the team name and five scores
 -- and returns a single String, formatted for printing
 ----------------------------------------------------------------
-formatScores:: (String, [Int]) -> Int -> String
-formatScores (teamName, [win, loss, tie, goalF, goalA]) nameLength = retString
+formatScores:: Int -> (String, [Int]) -> String
+formatScores nameLength (teamName, [win, loss, tie, goalF, goalA]) = retString
   where
     retString = "NOPE"
+
+
+
+----------------------------------------------------------------
+-- function padLeft
+-- pads the given string to make it the given length
+----------------------------------------------------------------
+padLeft:: String -> Int -> String
+padLeft text padLength =
+  if (length text) > padLength
+    then take padLength text
+    else text ++ (replicate ((length text) - padLength) ' ')
