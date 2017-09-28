@@ -90,10 +90,10 @@ exec2 =
 ----------------------------------------------------------------
 createStandings:: String -> String
 createStandings = show . map combineScores .
-  groupBy (\x y -> fst x == fst y) .
-    sort . concatMap getScores .
-      concat . groupBy (\x y -> head x == head y) .
-        sort . map words . lines
+                    groupBy (\x y -> fst x == fst y) .
+                      sort . concatMap getScores .
+                        concat . groupBy (\x y -> head x == head y) .
+                          sort . map words . lines
 
 
 ----------------------------------------------------------------
@@ -146,11 +146,16 @@ combineScores list = (teamName, scoreList)
 -- and returns a single String, formatted for printing
 ----------------------------------------------------------------
 formatOutput:: [(String, [Int])] -> String
-formatOutput list = "fuck"
+formatOutput list = "some string"
   where
     nameLength = maximum ( map (length . fst) list)
-    listOfLines = concatMap (formatScores nameLength) list
+      -- length of longest team name
 
+    maxNumLengths = foldr1 (zipWith max) ( map (map (length . show) . snd) list )
+      -- list of longest length for each number in the scores list
+
+    listOfLines = concatMap (formatScores nameLength) list
+      -- format each line of the output and concatenate them
 
 
 ----------------------------------------------------------------
