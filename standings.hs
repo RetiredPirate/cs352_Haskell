@@ -148,13 +148,20 @@ combineScores list = (teamName, scoreList)
 formatOutput:: [(String, [Int])] -> String
 formatOutput list = "some string"
   where
-    nameLength = maximum ( map (length . fst) list)
+    initNameLength = maximum ( map (length . fst) list)
       -- length of longest team name
 
-    maxNumLengths = foldr1 (zipWith max) ( map (map (length . show) . snd) list )
+    initNumLengths = foldr1 (zipWith max) ( map (map (length . show) . snd) list )
       -- list of longest length for each number in the scores list
 
-    listOfLines = concatMap (formatScores nameLength) list
+    minNameLength = 8
+    minNumLengths = repeat 5
+      -- Define minimum lengths for table columns
+    nameLength = max initNameLength minNameLength
+    numLengths = zipWith max initNumLengths minNumLengths
+      -- set width to minimum if less than minimum
+
+    listOfLines = concatMap (formatScores (nameLength : numLengths)) list
       -- format each line of the output and concatenate them
 
 
@@ -163,10 +170,12 @@ formatOutput list = "some string"
 -- takes a list of tuples with the team name and five scores
 -- and returns a single String, formatted for printing
 ----------------------------------------------------------------
-formatScores:: Int -> (String, [Int]) -> String
-formatScores nameLength (teamName, [win, loss, tie, goalF, goalA]) = retString
+formatScores:: [Int] -> (String, [Int]) -> String
+formatScores lengthsList (teamName, scores) = returnString
   where
-    retString = "NOPE"
+    valueList = teamName : map show scores
+      -- create a 6 length list of strings with values to match the lengths list
+    returnString = concat (zipWith padLeft lengthsList valueList)
 
 
 
