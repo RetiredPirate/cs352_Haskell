@@ -22,9 +22,7 @@ import Data.Char
 --   (See example in the function 'createIndex'.)
 --
 -- status:
---   Incomplete.  Presently, it just echos the contents of the
---   input file to standard output, because the 'createIndex' function is
---   dummied up.
+--   Complete. writes table of values to console
 --
 ----------------------------------------------------------------
 exec:: IO()
@@ -46,9 +44,7 @@ exec =
 --   (See example in the function 'createIndex'.)
 --
 -- status:
---   Incomplete.  Presently, it just echos the contents of the
---   input file to "output.txt", because the 'createIndex' function is
---   dummied up.
+--   Complete. Writes table of values to output.txt
 ----------------------------------------------------------------
 exec2:: IO()
 exec2 =
@@ -60,7 +56,6 @@ exec2 =
 -- a document that contains game results; produces list of standings,
 -- ordered by win-loss record, of all the teams that have competed.
 --
--- **** THIS IS THE FUNCTION YOU NEED TO CHANGE ****
 --
 -- calling sequence:
 --   createStandings str
@@ -75,7 +70,7 @@ exec2 =
 --     Broncos 1 Zags 0
 --   Then the result should be:
 --          Team       W       L       T      GF      GA
---       -------   -----   -----   -----   -----   -----
+--       -----------------------------------------------
 --        Pilots       3       1       0      12       7
 --       Broncos       2       1       1       5       4
 --          Zags       0       3       1       3       9
@@ -84,12 +79,12 @@ exec2 =
 --   (GA). (If still tied, use alphabetical order of team name.)
 --
 -- status:
---   Incomplete.  Presently, it just echos returns the contents of the
---   'str'.
+--   Creates table as shown above. Allows for arbitrary length
+--   team names (no spaces) and any size of Int (not Integer)
 --
 ----------------------------------------------------------------
 createStandings:: String -> String
-createStandings = show . map combineScores .
+createStandings = formatOutput . map combineScores .
                     groupBy (\x y -> fst x == fst y) .
                       sort . concatMap getScores .
                         concat . groupBy (\x y -> head x == head y) .
@@ -100,6 +95,12 @@ createStandings = show . map combineScores .
 -- function getScores
 -- Takes a list of strings and returns a list of two tuples
 -- for each team with their five score numbers
+--
+-- calling sequence:
+--    getScores ["thisIs", "42", "aList", "23"]
+--
+-- returns:
+--    [("thisIs", [1,0,0,42,23]), ("aList", [0,1,0,23,42])]
 ----------------------------------------------------------------
 getScores:: [String] -> [(String,[Int])]
 getScores [team1, score1, team2, score2] = [(team1, scoreList1), (team2, scoreList2)]
@@ -109,14 +110,14 @@ getScores [team1, score1, team2, score2] = [(team1, scoreList1), (team2, scoreLi
 
     -- set first 3 numbers based on who won, set scores as gf and ga
     scoreList1
-      | team1score > team2score = [1, 0, 0, team1score, team2score]
-      | team2score > team1score = [0, 1, 0, team1score, team2score]
-      | otherwise = [0, 0, 1, team1score, team2score]
+      | team1score > team2score = [1, 0, 0, team1score, team2score] --win
+      | team2score > team1score = [0, 1, 0, team1score, team2score] --loss
+      | otherwise = [0, 0, 1, team1score, team2score] --tie
 
     scoreList2
-      | team1score > team2score = [0, 1, 0, team2score, team1score]
-      | team2score > team1score = [1, 0, 0, team2score, team1score]
-      | otherwise = [0, 0, 1, team2score, team1score]
+      | team1score > team2score = [0, 1, 0, team2score, team1score] --loss
+      | team2score > team1score = [1, 0, 0, team2score, team1score] --win
+      | otherwise = [0, 0, 1, team2score, team1score] --tie
 
 
 ----------------------------------------------------------------
@@ -130,6 +131,13 @@ getScores [team1, score1, team2, score2] = [(team1, scoreList1), (team2, scoreLi
 --
 -- returns a single tuple with the team name and the list of
 -- five score numbers
+--
+--
+-- calling sequence:
+--    getScores [("team4", [1,0,0,16,3]), ("team4", [0,1,0,26,7])]
+--
+-- returns:
+--    ("team4", [1,1,0,42,10])
 ----------------------------------------------------------------
 combineScores:: [(String, [Int])] -> (String, [Int])
 combineScores list = (teamName, scoreList)
@@ -141,12 +149,19 @@ combineScores list = (teamName, scoreList)
 
 
 ----------------------------------------------------------------
--- function formatScores
+-- function formatOutput
 -- takes a list of tuples with the team name and five scores
 -- and returns a single String, formatted for printing
+--
+--
+-- calling sequence:
+--    getScores [("team4", [1,0,0,16,3]), ("team5", [2,1,5,7,5])]
+--
+-- returns:
+--    table, as shown in the comment for createStandings
 ----------------------------------------------------------------
 formatOutput:: [(String, [Int])] -> String
-formatOutput list = "some string"
+formatOutput list = returnString
   where
     initNameLength = maximum ( map (length . fst) list)
       -- length of longest team name
@@ -161,27 +176,46 @@ formatOutput list = "some string"
     numLengths = zipWith max initNumLengths minNumLengths
       -- set width to minimum if less than minimum
 
-    listOfLines = concatMap (formatScores (nameLength : numLengths)) list
+    lengthMasterList = map (3 +) (nameLength : numLengths)
+      -- 6 list of column widths with 3 spaces between each column
+
+
+    valueMasterList = map (\tup -> fst tup : map show (snd tup)) list  -- 6 list of collumn values
+
+
+    valueTable = concatMap (padLine lengthMasterList) valueMasterList
       -- format each line of the output and concatenate them
 
+    topLine = padLine lengthMasterList ["Team","W","L","T","GF","GA"]
+    sndLine = padLine lengthMasterList (repeat (replicate (maximum lengthMasterList) '-'))
+      -- fill the second line with dashes
+
+    returnString = topLine ++ sndLine ++ valueTable
+
+
+
 
 ----------------------------------------------------------------
--- function formatScores
--- takes a list of tuples with the team name and five scores
--- and returns a single String, formatted for printing
+-- function padLine
+-- zips a list of ints with a list of Strings using the padLeft
+-- function. This is used to format lines for the output table
+-- when called repeatedly with the same list of lengths
+--
+-- example:
+--    padLine [5,10,15] ["hello", "there", "friendo"]
+--        ->   "hello     there        friendo\n"
 ----------------------------------------------------------------
-formatScores:: [Int] -> (String, [Int]) -> String
-formatScores lengthsList (teamName, scores) = returnString
-  where
-    valueList = teamName : map show scores
-      -- create a 6 length list of strings with values to match the lengths list
-    returnString = concat (zipWith padLeft lengthsList valueList)
+padLine:: [Int] -> [String] -> String
+padLine lengthsList valueList = concat (zipWith padLeft lengthsList valueList) ++ "\n"
 
 
 
 ----------------------------------------------------------------
 -- function padLeft
 -- pads the given string to make it the given length
+--
+-- example:
+--   padLeft 7 "hi"   ->   "     hi"
 ----------------------------------------------------------------
 padLeft:: Int -> String -> String
 padLeft padLength text = reverse (take padLength (reverse text ++ cycle " "))
